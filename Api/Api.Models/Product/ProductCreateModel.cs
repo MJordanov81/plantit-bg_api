@@ -16,6 +16,8 @@
             ErrorMessage = ModelConstants.DescriptionLengthError)]
         public string Description { get; set; }
 
+        public string DetailsLink { get; set; }
+
         [Required]
         [Range(0, double.MaxValue, 
             ErrorMessage = ModelConstants.PriceRangeError)]

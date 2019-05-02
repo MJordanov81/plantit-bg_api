@@ -18,6 +18,8 @@
         [StringLength(1000)]
         public string Description { get; set; }
 
+        public string DetailsLink { get; set; }
+
         [Required]
         [Range(0, double.MaxValue)]
         public decimal Price { get; set; }

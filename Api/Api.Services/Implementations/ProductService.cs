@@ -43,6 +43,7 @@
             {
                 Name = data.Name,
                 Description = data.Description,
+                DetailsLink = data.DetailsLink,
                 Price = data.Price,
                 IsTopSeller = data.IsTopSeller,
                 Number = number
@@ -79,6 +80,7 @@
 
             product.Name = data.Name;
             product.Description = data.Description;
+            product.DetailsLink = data.DetailsLink;
             product.Price = data.Price;
             product.IsTopSeller = data.IsTopSeller;
             product.IsBlocked = data.IsBlocked;
@@ -240,7 +242,7 @@
                 .Select(sc => sc.SubcategoryId)
                 .ToListAsync();
 
-            return await this.db.Subcategories.Where(c => subcategoryIds.Contains(c.Id)).ProjectTo<SubcategoryDetailsModel>().ToListAsync();
+            return await this.db.Subcategories.Where(c => subcategoryIds.Contains(c.Id)).ProjectTo<SubcategoryDetailsModel>().OrderBy(sc => sc.Name).ToListAsync();
         }
 
         private async Task<ICollection<CategoryDetailsModel>> GetAssociatedCategoryIds(string productId)
@@ -250,7 +252,7 @@
                             .Select(sc => sc.CategoryId)
                             .ToListAsync();
 
-            return await this.db.Categories.Where(c => categoryIds.Contains(c.Id)).ProjectTo<CategoryDetailsModel>().ToListAsync();
+            return await this.db.Categories.Where(c => categoryIds.Contains(c.Id)).ProjectTo<CategoryDetailsModel>().OrderBy(c => c.Name).ToListAsync();
         }
 
 

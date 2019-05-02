@@ -24,7 +24,7 @@
 
         public async Task<ICollection<CategoryDetailsModel>> GetAll()
         {
-            return this.db.Categories.ProjectTo<CategoryDetailsModel>().ToList();
+            return this.db.Categories.ProjectTo<CategoryDetailsModel>().OrderBy(c => c.Name).ToList();
         }
 
         public async Task<string> Create(string categoryName)
@@ -48,6 +48,7 @@
         {
             IEnumerable<CategoryDetailsModel> categories = await this.db.Categories
                 .ProjectTo<CategoryDetailsModel>()
+                .OrderBy(c => c.Name)
                 .ToListAsync();
 
             if (!string.IsNullOrEmpty(pagination.FilterElement))

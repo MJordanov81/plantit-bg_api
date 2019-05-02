@@ -18,6 +18,8 @@
 
         public string Description { get; set; }
 
+        public string DetailsLink { get; set; }
+
         public decimal Price { get; set; }
 
         public int Quantity { get; set; }
