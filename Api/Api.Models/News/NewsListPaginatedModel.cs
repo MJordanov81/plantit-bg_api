@@ -4,7 +4,7 @@
 
     public class NewsListPaginatedModel
     {
-        public IEnumerable<NewsListModel> News { get; set; }
+        public IEnumerable<NewsDetailsModel> News { get; set; }
 
         public int NewsCount { get; set; }
     }

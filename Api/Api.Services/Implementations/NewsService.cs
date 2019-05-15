@@ -98,9 +98,9 @@
 
         public async Task<NewsListPaginatedModel> GetList(SimplePaginationModel pagination)
         {
-            IEnumerable<NewsListModel> news = this.db.News
+            IEnumerable<NewsDetailsModel> news = this.db.News
                 .OrderByDescending(n => n.CreationDate)
-                .ProjectTo<NewsListModel>()
+                .ProjectTo<NewsDetailsModel>()
                 .ToList();
 
             int newsCount = news.Count();
