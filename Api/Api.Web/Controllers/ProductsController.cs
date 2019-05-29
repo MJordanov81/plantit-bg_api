@@ -1,6 +1,8 @@
 ﻿namespace Api.Web.Controllers
 {
+    using Api.Domain.Enums;
     using Api.Models.Product;
+    using Api.Models.ProductMovement;
     using Api.Models.Shared;
     using Api.Services.Interfaces;
     using Microsoft.AspNetCore.Authorization;
@@ -83,6 +85,39 @@
                 string productId = await this.products.Create(product);
 
                 return this.Ok(new { productId = productId });
+            });
+        }
+
+        //post api/products/movement
+        [HttpPost]
+        [Route("movement")]
+        [Authorize]
+        public async Task<IActionResult> AddMovement([FromBody]ProductMovementCreateModel movement)
+        {
+
+            return await this.Execute(true, true, async () =>
+            {
+                await this.products.AddProductMovement(
+                    (ProductMovementType)movement.MovementType, 
+                    movement.ProductId, 
+                    movement.Quantity, 
+                    movement.Comment, 
+                    movement.TimeStamp);
+
+                return this.Ok();
+            });
+        }
+
+        [HttpGet]
+        [Route("movement/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetMovements(string id)
+        {
+            return await this.Execute(true, false, async () =>
+            {
+                var movements = await this.products.GetMovementsByProductId(id);
+
+                return this.Ok(movements);
             });
         }
     }

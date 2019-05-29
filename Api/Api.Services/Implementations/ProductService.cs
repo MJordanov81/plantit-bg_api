@@ -2,8 +2,10 @@
 {
     using Api.Data;
     using Api.Domain.Entities;
+    using Api.Domain.Enums;
     using Api.Models.Category;
     using Api.Models.Product;
+    using Api.Models.ProductMovement;
     using Api.Models.Shared;
     using Api.Models.Subcategory;
     using AutoMapper.QueryableExtensions;
@@ -116,6 +118,8 @@
 
             product.Subcategories = await this.GetAssociatedSubcategoryIds(product.Id);
 
+            product.Quantity = await this.CalculateQuantity(product.Id);
+
             return product;
         }
 
@@ -127,25 +131,17 @@
                 .ProjectTo<ProductDetailsModel>()
                 .ToList();
 
-            foreach (var product in products)
-            {
-                product.PromoDiscountsIds = await this.GetAssociatedPromoDiscuntsIds(product.Id);
-            }
-
-            foreach (var product in products)
-            {
-                product.Categories = await this.GetAssociatedCategoryIds(product.Id);
-            }
-
-            foreach (var product in products)
-            {
-                product.Subcategories = await this.GetAssociatedSubcategoryIds(product.Id);
-            }
-
             foreach (ProductDetailsModel product in products)
             {
+                product.PromoDiscountsIds = await this.GetAssociatedPromoDiscuntsIds(product.Id);
+
+                product.Categories = await this.GetAssociatedCategoryIds(product.Id);
+
+                product.Subcategories = await this.GetAssociatedSubcategoryIds(product.Id);
+
                 product.Discount = await this.CalculateDiscount(product.Id);
 
+                product.Quantity = await this.CalculateQuantity(product.Id);
             }
 
             if (!string.IsNullOrEmpty(pagination.FilterElement))
@@ -195,6 +191,27 @@
             result.Subcategories = uniqueSubategories;
 
             return result;
+        }
+
+        public async Task AddProductMovement(ProductMovementType movementType, string productId, int quantity, string comment, DateTime? timeStamp)
+        {
+            if (ProductMovementsConstants.NegativeMovements.Contains(movementType))
+            {
+                quantity *= -1;
+            }
+
+            ProductMovement movement = new ProductMovement
+            {
+                ProductId = productId,
+                MovementType = movementType,
+                Comment = comment,
+                Quantity = quantity,
+                TimeStamp = timeStamp == null ? DateTime.Now : (DateTime)timeStamp
+            };
+
+            await this.db.ProductMovements.AddAsync(movement);
+
+            await this.db.SaveChangesAsync();
         }
 
         private async Task<ICollection<CategoryDetailsModel>> PopulateCategories(ICollection<ProductDetailsModel> products)
@@ -285,6 +302,22 @@
 
             return discount;
         }
+
+        //Calculates product quantity
+        private async Task<int> CalculateQuantity(string productId)
+        {
+            int result = 0;
+
+            if(this.db.ProductMovements.Any(m => m.ProductId == productId))
+            {
+                result = await this.db.ProductMovements
+                    .Where(m => m.ProductId == productId)
+                    .SumAsync(m => m.Quantity);
+            }
+
+            return result;
+        }
+
 
         #region "FilterAndSort"
 
@@ -562,6 +595,20 @@
             await this.db.SaveChangesAsync();
 
             await this.AddToSubcategories(subcategories, productId);
+        }
+
+        public async Task<ICollection<ProductMovementViewModel>> GetMovementsByProductId(string productId)
+        {
+            if(! await this.db.Products.AnyAsync(p => p.Id == productId))
+            {
+                throw new ArgumentException(ErrorMessages.InvalidProductId);
+            }
+
+            return this.db.ProductMovements
+                .Where(pm => pm.ProductId == productId)
+                .OrderByDescending(pm => pm.TimeStamp)
+                .ProjectTo<ProductMovementViewModel>()
+                .ToList();
         }
 
         #endregion

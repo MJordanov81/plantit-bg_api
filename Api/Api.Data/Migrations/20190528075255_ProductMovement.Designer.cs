@@ -12,9 +12,10 @@ using System;
 namespace Api.Data.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190528075255_ProductMovement")]
+    partial class ProductMovement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -436,8 +437,6 @@ namespace Api.Data.Migrations
                     b.Property<string>("ProductId");
 
                     b.Property<int>("Quantity");
-
-                    b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 

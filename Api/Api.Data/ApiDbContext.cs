@@ -64,6 +64,8 @@
 
         public DbSet<Settings> Settings { get; set; }
 
+        public DbSet<ProductMovement> ProductMovements { get; set; }
+
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)

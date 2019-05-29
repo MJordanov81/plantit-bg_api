@@ -21,6 +21,8 @@
             builder.HasMany(p => p.ProductsPromotions).WithOne(pp => pp.Product).HasForeignKey(pp => pp.ProductId);
 
             builder.HasMany(p => p.DiscountedProductsPromotions).WithOne(dp => dp.Product).HasForeignKey(dp => dp.ProductId);
+
+            builder.HasMany(p => p.Movements).WithOne(m => m.Product).HasForeignKey(m => m.ProductId);
         }
     }
 }

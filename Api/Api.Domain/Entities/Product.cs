@@ -43,6 +43,8 @@
 
         public ICollection<ProductPromotion> ProductsPromotions { get; set; } = new List<ProductPromotion>();
 
+        public ICollection<ProductMovement> Movements { get; set; } = new List<ProductMovement>();
+
         public ICollection<DiscountedProductPromotion> DiscountedProductsPromotions { get; set; } = new List<DiscountedProductPromotion>();
     }
 }

@@ -23,13 +23,16 @@
 
         private readonly INumeratorService numerator;
 
+        private readonly IProductService products;
+
         private string modification;
 
-        public OrderService(ApiDbContext db, INumeratorService numerator, IOrderLogService logger)
+        public OrderService(ApiDbContext db, INumeratorService numerator, IOrderLogService logger, IProductService products)
         {
             this.db = db;
             this.numerator = numerator;
             this.logger = logger;
+            this.products = products;
         }
 
         public async Task<string> Create(OrderWithoutUserCreateModel data, string userId)
@@ -193,6 +196,8 @@
 
             order.LastModificationDate = DateTime.Now;
 
+            OrderStatus oldStatus = order.Status;
+
             order.Status = newStatus;
 
             string action = "";
@@ -213,12 +218,44 @@
                     break;
             }
 
+            await this.UpdateProductQuantity(id, oldStatus, newStatus);
+
             await logger.Log(id, userId, action);
 
             return this.db.Orders
                 .Where(o => o.Id == id)
                 .ProjectTo<OrderDetailsModel>()
                 .FirstOrDefault();
+        }
+
+        private async Task UpdateProductQuantity(string orderId,OrderStatus oldStatus, OrderStatus newStatus)
+        {
+
+            if (oldStatus == newStatus) return;
+
+            ICollection<ProductOrder> productOrders = this.db.ProductOrders
+                .Where(po => po.OrderId == orderId)
+                .ToList();
+
+            foreach (ProductOrder productOrder in productOrders)
+            {
+                switch (newStatus)
+                {
+                    case OrderStatus.Confirmed:
+                        await this.products
+                            .AddProductMovement(ProductMovementType.Sale, productOrder.ProductId, productOrder.Quantity, "Продажба", DateTime.Now);
+                        break;
+
+                    case OrderStatus.Cancelled:
+
+                        if(oldStatus == OrderStatus.Confirmed || oldStatus == OrderStatus.Dispatched)
+                        {
+                            await this.products
+                                .AddProductMovement(ProductMovementType.SaleCorrection, productOrder.ProductId, productOrder.Quantity, "Отказана проръчка", DateTime.Now);
+                        }
+                        break;
+                }             
+           }
         }
 
         #region "UpdateProductOrders"
