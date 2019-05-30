@@ -60,7 +60,10 @@
 
             SettingsViewEditModel settings = await this.settings.Get();
 
-            this.HttpContext.Response.Headers.Add("ApiSettings", JsonConvert.SerializeObject(settings));
+            this.HttpContext
+                .Response
+                .Headers
+                .Add("ApiSettings", JsonConvert.SerializeObject(settings));
 
             try
             {
