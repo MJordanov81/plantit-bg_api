@@ -1,8 +1,10 @@
 ﻿namespace Api.Web.Controllers
 {
+    using Api.Models.Settings;
     using Api.Services.Interfaces;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Newtonsoft.Json;
     using System;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -10,10 +12,12 @@
     public abstract class BaseController : Controller
     {
         private readonly IUserService users;
+        private readonly ISettingsService settings;
 
-        protected BaseController(IUserService users)
+        protected BaseController(IUserService users, ISettingsService settings)
         {
             this.users = users;
+            this.settings = settings;
         }
 
         protected string UserId => this.GetCurrentUserId();
@@ -53,6 +57,10 @@
             {
                 return this.BadRequest(ModelState);
             }
+
+            SettingsViewEditModel settings = await this.settings.Get();
+
+            this.HttpContext.Response.Headers.Add("ApiSettings", JsonConvert.SerializeObject(settings));
 
             try
             {

@@ -11,7 +11,7 @@
     public class SettingsController : BaseController
     {
         private readonly ISettingsService settings;
-        public SettingsController(ISettingsService settings, IUserService users) : base(users)
+        public SettingsController(ISettingsService settings, IUserService users) : base(users, settings)
         {
             this.settings = settings;
         }
